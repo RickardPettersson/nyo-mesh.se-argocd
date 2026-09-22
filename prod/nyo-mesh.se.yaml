@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nyo-mesh-se-prod
+  namespace: nyo-mesh-se-prod
+  labels:
+    app: nyo-mesh-se-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nyo-mesh-se-prod
+  template:
+    metadata:
+      labels:
+        app: nyo-mesh-se-prod
+    spec:
+      imagePullSecrets:
+      - name: registrycredentials
+      containers:
+        - name: nyo-mesh-se-prod
+          image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-f8180a9
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nyo-mesh-se-prod
+  namespace: nyo-mesh-se-prod
+  labels:
+    app: nyo-mesh-se-prod
+spec:
+  selector:
+    app: nyo-mesh-se-prod
+  ports:
+    - port: 80
+      targetPort: 80
