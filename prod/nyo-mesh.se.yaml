@@ -36,3 +36,24 @@ spec:
   ports:
     - port: 80
       targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nyo-mesh-se-prod
+  namespace: nyo-mesh-se-prod
+  labels:
+    app: nyo-mesh-se-prod
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: nyo-mesh.se
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nyo-mesh-se-prod
+                port:
+                  number: 80
