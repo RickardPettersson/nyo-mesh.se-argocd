@@ -6,24 +6,24 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nyo-mesh-se-prod
+  name: nyo-mesh-se
   namespace: nyo-mesh-se-prod
   labels:
-    app: nyo-mesh-se-prod
+    app: nyo-mesh-se
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nyo-mesh-se-prod
+      app: nyo-mesh-se
   template:
     metadata:
       labels:
-        app: nyo-mesh-se-prod
+        app: nyo-mesh-se
     spec:
       imagePullSecrets:
       - name: registrycredentials
       containers:
-        - name: nyo-mesh-se-prod
+        - name: nyo-mesh-se
           image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-f8180a9
           ports:
             - containerPort: 80
@@ -31,13 +31,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: nyo-mesh-se-prod
+  name: nyo-mesh-se
   namespace: nyo-mesh-se-prod
   labels:
-    app: nyo-mesh-se-prod
+    app: nyo-mesh-se
 spec:
   selector:
-    app: nyo-mesh-se-prod
+    app: nyo-mesh-se
   ports:
     - port: 80
       targetPort: 80
@@ -45,10 +45,10 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: nyo-mesh-se-prod
+  name: nyo-mesh-se
   namespace: nyo-mesh-se-prod
   labels:
-    app: nyo-mesh-se-prod
+    app: nyo-mesh-se
 spec:
   ingressClassName: nginx
   rules:
@@ -59,6 +59,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: nyo-mesh-se-prod
+                name: nyo-mesh-se
                 port:
                   number: 80
