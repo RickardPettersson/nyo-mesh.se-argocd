@@ -20,8 +20,6 @@ spec:
       labels:
         app: nyo-mesh-se
     spec:
-      imagePullSecrets:
-      - name: registrycredentials
       containers:
         - name: nyo-mesh-se
           image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-f8180a9
