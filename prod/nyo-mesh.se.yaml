@@ -1,6 +1,12 @@
 apiVersion: v1
 kind: Namespace
 metadata:
+  # Egen sync-wave: ArgoCD dry-kör alla resurser i en wave innan den
+  # applicerar något. Ligger namespacet i samma wave som Deployment/Service/
+  # Ingress faller deras dry-run på "namespace not found" och hela syncen
+  # avbryts innan namespacet hunnit skapas.
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
   name: nyo-mesh-se-prod
 ---
 apiVersion: apps/v1
@@ -25,6 +31,28 @@ spec:
           image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-f8180a9
           ports:
             - containerPort: 80
+          # /healthz kommer från nginx/default.conf i app-repot.
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          # Statisk nginx: liten och förutsägbar. Requests håller podden ur
+          # BestEffort-klassen så den inte dödas först vid minnestryck.
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 200m
+              memory: 64Mi
 ---
 apiVersion: v1
 kind: Service
@@ -47,8 +75,20 @@ metadata:
   namespace: nyo-mesh-se-prod
   labels:
     app: nyo-mesh-se
+  annotations:
+    # cert-manager utfärdar och förnyar certet automatiskt och lägger det i
+    # secreten under tls.secretName nedan. Byt till letsencrypt-staging om du
+    # felsöker — prod har hårda rate limits på misslyckade försök.
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
-  ingressClassName: nginx
+  # MicroK8s ingress-controller körs med --ingress-class=public. Klassen
+  # "nginx" finns som objekt i klustret men ingen controller bevakar den,
+  # så en Ingress med den klassen ignoreras tyst — inget fel syns någonstans.
+  ingressClassName: public
+  tls:
+    - hosts:
+        - nyo-mesh.se
+      secretName: nyo-mesh-se-tls
   rules:
     - host: nyo-mesh.se
       http:
