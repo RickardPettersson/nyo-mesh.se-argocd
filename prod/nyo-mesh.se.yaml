@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: nyo-mesh-se
-          image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-1e063c6
+          image: ghcr.io/rickardpettersson/nyo-mesh.se:sha-bc33899
           ports:
             - containerPort: 80
           # /healthz kommer från nginx/default.conf i app-repot.
